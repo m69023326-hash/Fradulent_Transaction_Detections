@@ -132,7 +132,7 @@ def set_background():
     }}
     
     .header {{
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: #333333 !important;
         padding: 2rem;
         border-radius: 15px;
         margin-bottom: 2rem;
@@ -166,7 +166,7 @@ def set_background():
     }}
     
     .stButton > button {{
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+        background: #333333 !important;
         color: white !important;
         border: none !important;
         padding: 14px 28px !important;
