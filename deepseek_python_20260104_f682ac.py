@@ -21,7 +21,7 @@ if 'current_step' not in st.session_state:
 
 # Function to set background
 def set_background():
-    background_url = "https://plus.unsplash.com/premium_photo-1675055730240-96a4ed84e482?q=80&w=327&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+    background_url = "https://g.foolcdn.com/image/?url=https%3A%2F%2Fg.foolcdn.com%2Feditorial%2Fimages%2F441531%2Famex-platinum-from-amex.png&w=1920&op=resize"
     
     style = f"""
     <style>
