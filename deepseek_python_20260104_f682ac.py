@@ -99,7 +99,7 @@ def get_risk_level(risk_score):
 
 # Function to set background
 def set_background():
-    background_url = "https://mms.businesswire.com/media/20250615656142/en/2498487/4/212443-04-UP-DUAL-CARDS_V17_FNL.jpg"
+    background_url = "https://cdn.mos.cms.futurecdn.net/uKXZL3qgJyQRYu26KhMxd6-970-80.jpg.webp"
     
     style = f"""
     <style>
