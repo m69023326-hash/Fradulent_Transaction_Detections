@@ -99,7 +99,7 @@ def get_risk_level(risk_score):
 
 # Function to set background
 def set_background():
-    background_url = "https://avatars.mds.yandex.net/i?id=e2ef8f08c7985183b8183fdbb2c1330aea083d11-4432918-images-thumbs&n=13"
+    background_url = "https://mms.businesswire.com/media/20250615656142/en/2498487/4/212443-04-UP-DUAL-CARDS_V17_FNL.jpg"
     
     style = f"""
     <style>
@@ -552,7 +552,7 @@ def main():
             Live Transaction Security System • Updated: {current_time}
         </p>
         <p style="margin: 0; color: #9ca3af; font-size: 0.85rem;">
-            © 2024 FraudGuard Security | Real-time Risk Assessment
+            © 2026 FraudGuard Security | Real-time Risk Assessment by Mubashir Arshad and Fellows
         </p>
     </div>
     """, unsafe_allow_html=True)
