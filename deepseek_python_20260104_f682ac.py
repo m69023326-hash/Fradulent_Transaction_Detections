@@ -276,7 +276,7 @@ def main():
         </div>
         """, unsafe_allow_html=True)
         
-        # Transaction Security Analysis
+        # Transaction Security Analysis - EXACT TEXT FROM YOUR TEMPLATE
         st.markdown("---")
         st.markdown("""
         <div class="analysis-section">
