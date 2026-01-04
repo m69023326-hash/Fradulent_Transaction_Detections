@@ -1,0 +1,13 @@
+fraudguard-app/
+├── app.py
+├── requirements.txt
+├── style.css
+├── assets/
+│   ├── background.png (you'll need to add your background image here)
+│   ├── logo.png (optional - for FraudGuard logo)
+│   └── icons/
+│       ├── control-panel.png
+│       ├── network-stats.png
+│       └── security-scan.png
+├── README.md
+└── .gitignore
