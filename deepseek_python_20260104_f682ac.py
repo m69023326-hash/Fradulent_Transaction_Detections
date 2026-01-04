@@ -99,7 +99,7 @@ def get_risk_level(risk_score):
 
 # Function to set background
 def set_background():
-    background_url = "https://cdn.mos.cms.futurecdn.net/uKXZL3qgJyQRYu26KhMxd6-970-80.jpg.webp"
+    background_url = "https://wise.com/imaginary-v2/d9d50c9d096e6bb7490b1e6a72f65f83.jpg?width=1200"
     
     style = f"""
     <style>
@@ -224,10 +224,10 @@ def main():
         <h1 style="color: white; margin-bottom: 10px; font-size: 2.5rem;">
             🛡️ FraudGuard™ Enterprise
         </h1>
-        <h3 style="color: rgba(255, 255, 255, 0.95); margin: 5px 0; font-weight: 400;">
+        <h3 style="color: black(255, 255, 255, 0.95); margin: 5px 0; font-weight: 400;">
             Live Transaction Security Dashboard
         </h3>
-        <p style="color: rgba(255, 255, 255, 0.85); margin: 5px 0 0 0; font-size: 0.9rem;">
+        <p style="color: black(255, 255, 255, 0.85); margin: 5px 0 0 0; font-size: 0.9rem;">
             Real-time risk assessment • Updated: {current_time}
         </p>
     </div>
