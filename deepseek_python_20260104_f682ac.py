@@ -2,7 +2,6 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 from datetime import datetime
-import time
 
 # Page configuration
 st.set_page_config(
@@ -19,10 +18,6 @@ if 'transaction_data' not in st.session_state:
     st.session_state.transaction_data = {}
 if 'current_step' not in st.session_state:
     st.session_state.current_step = 1
-if 'live_risk_score' not in st.session_state:
-    st.session_state.live_risk_score = 0
-if 'last_update' not in st.session_state:
-    st.session_state.last_update = datetime.now()
 
 # Function to calculate dynamic risk score
 def calculate_risk_score(amount, v14, v17, payment_method, merchant, device_type="Desktop"):
@@ -32,13 +27,13 @@ def calculate_risk_score(amount, v14, v17, payment_method, merchant, device_type
     base_risk = 0.05
     
     # Amount-based risk (higher amounts = higher risk)
-    amount_risk = min(amount / 10000, 0.25)  # Caps at 25% for amounts over $10,000
+    amount_risk = min(amount / 10000, 0.25)
     
     # V14 risk (structural anomalies)
-    v14_risk = v14 * 0.25  # Max 25% contribution
+    v14_risk = v14 * 0.25
     
     # V17 risk (behavioral patterns)
-    v17_risk = v17 * 0.20  # Max 20% contribution
+    v17_risk = v17 * 0.20
     
     # Payment method risk
     payment_risks = {
@@ -50,7 +45,7 @@ def calculate_risk_score(amount, v14, v17, payment_method, merchant, device_type
     }
     method_risk = payment_risks.get(payment_method, 0.10)
     
-    # Merchant risk (some merchants are higher risk)
+    # Merchant risk
     merchant_risks = {
         "Amazon": 0.05,
         "Apple": 0.04,
@@ -73,18 +68,18 @@ def calculate_risk_score(amount, v14, v17, payment_method, merchant, device_type
     }
     device_risk = device_risks.get(device_type, 0.10)
     
-    # Time-based risk (transactions at odd hours are riskier)
+    # Time-based risk
     current_hour = datetime.now().hour
-    if 0 <= current_hour < 6:  # Night time (12AM - 6AM)
+    if 0 <= current_hour < 6:
         time_risk = 0.15
-    elif 6 <= current_hour < 12:  # Morning (6AM - 12PM)
+    elif 6 <= current_hour < 12:
         time_risk = 0.05
-    elif 12 <= current_hour < 18:  # Afternoon (12PM - 6PM)
+    elif 12 <= current_hour < 18:
         time_risk = 0.04
-    else:  # Evening (6PM - 12AM)
+    else:
         time_risk = 0.08
     
-    # Calculate total risk (cap at 95%)
+    # Calculate total risk
     total_risk = min(
         base_risk + amount_risk + v14_risk + v17_risk + method_risk + merchant_risk + device_risk + time_risk,
         0.95
@@ -209,16 +204,6 @@ def set_background():
         background: black;
         transform: translateX(-50%);
     }}
-    
-    .live-update {{
-        background: #f0f9ff;
-        border-left: 4px solid #3b82f6;
-        padding: 10px 15px;
-        border-radius: 8px;
-        margin: 10px 0;
-        font-size: 0.9rem;
-        color: #1e40af;
-    }}
     </style>
     """
     st.markdown(style, unsafe_allow_html=True)
@@ -232,7 +217,9 @@ def main():
     st.markdown('<div class="main-container">', unsafe_allow_html=True)
     
     # Header
-    st.markdown("""
+    current_time = datetime.now().strftime('%H:%M:%S')
+    
+    st.markdown(f"""
     <div class="header">
         <h1 style="color: white; margin-bottom: 10px; font-size: 2.5rem;">
             🛡️ FraudGuard™ Enterprise
@@ -241,33 +228,19 @@ def main():
             Live Transaction Security Dashboard
         </h3>
         <p style="color: rgba(255, 255, 255, 0.85); margin: 5px 0 0 0; font-size: 0.9rem;">
-            Real-time risk assessment with live updates
+            Real-time risk assessment • Updated: {current_time}
         </p>
     </div>
     """, unsafe_allow_html=True)
     
-    # Live update indicator
-    current_time = datetime.now()
-    time_diff = (current_time - st.session_state.last_update).seconds
-    if time_diff < 5:  # Show live indicator for 5 seconds after update
-        st.markdown("""
-        <div class="live-update">
-            🔄 <strong>Live Update:</strong> Risk assessment updated in real-time
-        </div>
-        """, unsafe_allow_html=True)
-    
     # Toggle button for control panel
-    col_toggle, col_time = st.columns([1, 5])
+    col_toggle, _ = st.columns([1, 5])
     with col_toggle:
         toggle_icon = "🔽" if st.session_state.control_panel_visible else "▶️"
         toggle_text = "Hide" if st.session_state.control_panel_visible else "Show"
         if st.button(f"{toggle_icon} {toggle_text}", key="toggle_btn"):
             st.session_state.control_panel_visible = not st.session_state.control_panel_visible
-            st.session_state.last_update = datetime.now()
             st.rerun()
-    
-    with col_time:
-        st.markdown(f"<p style='text-align: right; color: #6b7280; font-size: 0.9rem;'>Last update: {current_time.strftime('%H:%M:%S')}</p>", unsafe_allow_html=True)
     
     # Step indicator
     if st.session_state.current_step == 1:
@@ -277,7 +250,7 @@ def main():
     elif st.session_state.current_step == 3:
         st.markdown("### ✅ Action Completed")
     
-    # Step 1: Transaction Input with Live Risk Preview
+    # Step 1: Transaction Input
     if st.session_state.current_step == 1:
         st.markdown("Enter transaction details for live fraud analysis:")
         
@@ -293,19 +266,16 @@ def main():
                 amount = st.number_input("Amount (USD)", 
                     min_value=0.0, 
                     max_value=100000.0, 
-                    value=500.0,  # Lower default for fair transaction
-                    step=100.0,
-                    help="Lower amounts typically have lower risk")
+                    value=500.0,
+                    step=100.0)
                 
                 merchant = st.selectbox("Merchant", 
                     ["Amazon", "Apple", "Netflix", "Uber", "Airbnb", "Walmart", "Target", "Best Buy", "Other"],
-                    index=0,
-                    help="Select the merchant. Some have higher risk profiles.")
+                    index=0)
                 
                 device_type = st.selectbox("Device Type",
                     ["Desktop", "Mobile", "Tablet", "Unknown"],
-                    index=0,
-                    help="Unknown devices have higher risk")
+                    index=0)
                 
                 st.markdown('</div>', unsafe_allow_html=True)
             
@@ -314,60 +284,42 @@ def main():
                 st.markdown("**Risk Parameters**")
                 
                 st.markdown("**V14 - Structural Analysis**")
-                st.markdown("*Lower values indicate normal patterns*")
-                v14 = st.slider("", 0.0, 1.0, 0.35, 0.01, label_visibility="collapsed", 
-                    help="0.0-0.3: Normal, 0.3-0.6: Suspicious, 0.6-1.0: High Risk")
+                v14 = st.slider("V14 Score", 0.0, 1.0, 0.35, 0.01, label_visibility="collapsed")
                 
                 st.markdown("**V17 - Behavioral Analysis**")
-                st.markdown("*Lower values indicate typical behavior*")
-                v17 = st.slider(" ", 0.0, 1.0, 0.25, 0.01, label_visibility="collapsed",
-                    help="0.0-0.3: Normal, 0.3-0.6: Suspicious, 0.6-1.0: High Risk")
+                v17 = st.slider("V17 Score", 0.0, 1.0, 0.25, 0.01, label_visibility="collapsed")
                 
                 payment_method = st.selectbox("Payment Method", 
                     ["Credit Card", "Debit Card", "Digital Wallet", "Bank Transfer", "Cryptocurrency"],
-                    index=0,
-                    help="Some payment methods have higher risk")
+                    index=0)
                 
-                # Calculate and show live risk preview
-                if amount > 0:
+                # Live risk calculation
+                if st.form_submit_button:
                     live_risk = calculate_risk_score(amount, v14, v17, payment_method, merchant, device_type)
-                    risk_level, risk_color, risk_icon = get_risk_level(live_risk)
+                    risk_level, risk_color, _ = get_risk_level(live_risk)
                     
                     st.markdown("---")
                     st.markdown("**Live Risk Preview**")
                     
                     col_preview1, col_preview2 = st.columns([2, 1])
                     with col_preview1:
-                        st.markdown(f"**Risk Level:** {risk_icon} {risk_level}")
+                        st.markdown(f"**Risk Level:** {risk_level}")
                         st.markdown(f"**Score:** {(live_risk * 100):.1f}%")
                     
                     with col_preview2:
                         risk_percent = live_risk * 100
-                        marker_position = risk_percent  # Percentage along the gradient
                         st.markdown(f"""
                         <div style="position: relative; width: 100%; margin: 10px 0;">
                             <div class="risk-gauge"></div>
-                            <div class="risk-marker" style="left: {marker_position}%;"></div>
-                            <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: #6b7280; margin-top: 5px;">
-                                <span>Low</span>
-                                <span>Medium</span>
-                                <span>High</span>
-                            </div>
+                            <div class="risk-marker" style="left: {risk_percent}%;"></div>
                         </div>
                         """, unsafe_allow_html=True)
                 
                 st.markdown('</div>', unsafe_allow_html=True)
             
-            # Auto-refresh for live updates
-            if 'form_submitted' in st.session_state:
-                time.sleep(0.5)  # Small delay for visual feedback
-                st.session_state.last_update = datetime.now()
-                st.rerun()
-            
             submitted = st.form_submit_button("🚀 Analyze Transaction", type="primary", use_container_width=True)
             
             if submitted:
-                # Store transaction data
                 st.session_state.transaction_data = {
                     "id": transaction_id,
                     "amount": amount,
@@ -380,18 +332,16 @@ def main():
                     "risk_score": calculate_risk_score(amount, v14, v17, payment_method, merchant, device_type)
                 }
                 st.session_state.current_step = 2
-                st.session_state.last_update = datetime.now()
-                st.session_state.form_submitted = True
                 st.rerun()
     
-    # Step 2: Analysis Results with Dynamic Risk
+    # Step 2: Analysis Results
     elif st.session_state.current_step == 2:
         data = st.session_state.transaction_data
         
         # Get risk details
         risk_score = data['risk_score']
         risk_percent = risk_score * 100
-        risk_level, risk_color, risk_icon = get_risk_level(risk_score)
+        risk_level, risk_color, _ = get_risk_level(risk_score)
         
         # Display results
         st.markdown("### 📊 Analysis Results")
@@ -402,29 +352,18 @@ def main():
             st.markdown('<div class="simple-card">', unsafe_allow_html=True)
             st.markdown("**Risk Assessment**")
             
-            # Dynamic risk display
             st.markdown(f"""
             <div style="text-align: center; margin: 20px 0;">
                 <div style="font-size: 3.5rem; font-weight: 800; color: {risk_color}; margin-bottom: 10px;">
                     {risk_percent:.1f}%
                 </div>
                 <div style="font-size: 1.5rem; color: {risk_color}; font-weight: 700; margin: 15px 0;">
-                    {risk_icon} {risk_level} RISK
+                    {risk_level} RISK
                 </div>
                 
                 <div style="position: relative; width: 80%; margin: 20px auto;">
                     <div class="risk-gauge"></div>
                     <div class="risk-marker" style="left: {risk_percent}%;"></div>
-                </div>
-                
-                <div style="margin-top: 20px; padding: 15px; background: rgba(229, 231, 235, 0.3); border-radius: 10px;">
-                    <p style="margin: 0; color: #374151; font-size: 0.9rem;">
-                        <strong>Recommendation:</strong> {
-                            'Approve immediately' if risk_level == '✅ LOW' 
-                            else 'Review recommended' if risk_level == '⚠️ MEDIUM' 
-                            else 'Block immediately'
-                        }
-                    </p>
                 </div>
             </div>
             """, unsafe_allow_html=True)
@@ -434,7 +373,7 @@ def main():
             st.markdown('<div class="simple-card">', unsafe_allow_html=True)
             st.markdown("**Transaction Details**")
             
-            # Risk factors breakdown
+            # Risk factors
             st.markdown("**Risk Factors:**")
             
             factors = [
@@ -473,34 +412,26 @@ def main():
             </div>
             """, unsafe_allow_html=True)
             
-            # Action buttons based on risk level
+            # Action buttons
             st.markdown("---")
             col_btn1, col_btn2, col_btn3 = st.columns(3)
             
             with col_btn1:
-                if st.button("✅ Approve", use_container_width=True, 
-                           disabled=risk_level=="🚨 HIGH",
-                           help="Approve transaction" if risk_level!="🚨 HIGH" else "Cannot approve high risk transactions"):
+                if st.button("✅ Approve", use_container_width=True):
                     st.session_state.current_step = 3
                     st.session_state.action = "approved"
-                    st.session_state.last_update = datetime.now()
                     st.rerun()
             
             with col_btn2:
-                if st.button("⚠️ Review", use_container_width=True,
-                           help="Flag for manual review"):
+                if st.button("⚠️ Review", use_container_width=True):
                     st.session_state.current_step = 3
                     st.session_state.action = "flagged"
-                    st.session_state.last_update = datetime.now()
                     st.rerun()
             
             with col_btn3:
-                if st.button("🛑 Block", use_container_width=True,
-                           disabled=risk_level=="✅ LOW",
-                           help="Block transaction" if risk_level!="✅ LOW" else "Low risk transactions should not be blocked"):
+                if st.button("🛑 Block", use_container_width=True):
                     st.session_state.current_step = 3
                     st.session_state.action = "blocked"
-                    st.session_state.last_update = datetime.now()
                     st.rerun()
             
             st.markdown('</div>', unsafe_allow_html=True)
@@ -508,7 +439,6 @@ def main():
         # Back button
         if st.button("← Back to Input", use_container_width=False):
             st.session_state.current_step = 1
-            st.session_state.last_update = datetime.now()
             st.rerun()
     
     # Step 3: Action Completed
@@ -576,9 +506,6 @@ def main():
         if st.button("🔄 Start New Analysis", type="primary", use_container_width=True):
             st.session_state.current_step = 1
             st.session_state.transaction_data = {}
-            st.session_state.last_update = datetime.now()
-            if 'form_submitted' in st.session_state:
-                del st.session_state.form_submitted
             st.rerun()
     
     # Control Panel
@@ -614,28 +541,23 @@ def main():
     
     # Footer
     st.markdown("---")
-    st.markdown("""
+    current_time = datetime.now().strftime('%H:%M:%S')
+    
+    st.markdown(f"""
     <div class="footer">
         <p style="margin: 0; font-weight: 700; color: #111827;">
             🛡️ FraudGuard™ Enterprise
         </p>
         <p style="margin: 10px 0; color: #6b7280;">
-            Live Transaction Security System • Updated: {current_time.strftime('%H:%M:%S')}
+            Live Transaction Security System • Updated: {current_time}
         </p>
         <p style="margin: 0; color: #9ca3af; font-size: 0.85rem;">
             © 2024 FraudGuard Security | Real-time Risk Assessment
         </p>
     </div>
-    """.format(current_time=datetime.now()), unsafe_allow_html=True)
+    """, unsafe_allow_html=True)
     
     st.markdown('</div>', unsafe_allow_html=True)
-    
-    # Auto-refresh logic (every 10 seconds when on step 1)
-    if st.session_state.current_step == 1:
-        time.sleep(0.1)  # Small delay for better UX
-        if (datetime.now() - st.session_state.last_update).seconds > 10:
-            st.session_state.last_update = datetime.now()
-            st.rerun()
 
 if __name__ == "__main__":
     main()
